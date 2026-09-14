@@ -79,6 +79,12 @@ const CREATE_TEAM_CHANNEL_COMMAND = {
       description: 'Fourth person to add to the channel',
       required: false,
     },
+    {
+      type: 6,
+      name: 'person_5',
+      description: 'Fifth person to add to the channel',
+      required: false,
+    },
   ],
   type: 1,
   integration_types: [0],

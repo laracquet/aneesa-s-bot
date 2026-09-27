@@ -44,6 +44,28 @@ const CHALLENGE_COMMAND = {
   contexts: [0, 2],
 };
 
+const UPDATE_TEAM_CHANNEL_COMMAND = {
+  name: 'update-team-channel',
+  description: 'update with a user',
+  options: [
+    {
+      type: 3,
+      name: 'channel_name',
+      descition: 'Name of channel',
+      required: true,
+    },
+    {
+      type: 6,
+      name: 'add_user',
+      description: 'User to add to existing platform',
+      required: true,
+    }
+  ],
+  type: 1,
+  integration_types: [0],
+  contexts:  [0],
+}
+
 
 const CREATE_TEAM_CHANNEL_COMMAND = {
   name: 'create-team-channel',
@@ -85,10 +107,16 @@ const CREATE_TEAM_CHANNEL_COMMAND = {
       description: 'Fifth person to add to the channel',
       required: false,
     },
+    {
+      type: 6,
+      name: 'person_6',
+      description: 'sixth person to add to the channel',
+      required: false,
+    },
   ],
   type: 1,
   integration_types: [0],
   contexts: [0],
 };
-const ALL_COMMANDS = [TEST_COMMAND, CHALLENGE_COMMAND, CREATE_TEAM_CHANNEL_COMMAND];
+const ALL_COMMANDS = [TEST_COMMAND, CHALLENGE_COMMAND, CREATE_TEAM_CHANNEL_COMMAND, UPDATE_TEAM_CHANNEL_COMMAND];
 InstallGlobalCommands(process.env.APP_ID, ALL_COMMANDS);

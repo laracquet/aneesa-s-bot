@@ -160,9 +160,78 @@ app.post('/interactions', verifyKeyMiddleware(process.env.PUBLIC_KEY), async fun
       }
     }
 
+    
+    // /update-team-channel
+    if (name === 'update-team-channel') {
+      const channelName = data.options.find(o => o.name === 'channel_name').value;
+      const guildId = req.body.guild_id;
+
+      // Collect all mentioned users from person_1, person_2, etc.
+      const userIds = data.options
+        .filter(o => o.name.startsWith('person_'))
+        .map(o => o.value);
+
+      try {
+        // Find the "Teams" category
+        const channelsRes = await DiscordRequest(`guilds/${guildId}/channels`, { method: 'GET' });
+        const channels = await channelsRes.json();
+
+        const teamsCategory = channels.find(
+          (c) => c.type === 4 && c.name.toLowerCase() === 'teams'
+        );
+
+        if (!teamsCategory) {
+          return res.send({
+            type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
+            data: {
+              content: '❌ No category named **Teams** found. Please create it first.',
+              flags: InteractionResponseFlags.EPHEMERAL,
+            },
+          });
+        }
+
+        // Permission bits: VIEW_CHANNEL + SEND_MESSAGES + READ_MESSAGE_HISTORY
+        const allowBits = (1024n | 2048n | 65536n).toString();
+
+        const permissionOverwrites = [
+          {
+            id: guildId,  // @everyone role ID = guild ID
+            type: 0,      // role
+            deny: '1024', // deny VIEW_CHANNEL
+          },
+          ...userIds.map(userId => ({
+            id: userId,
+            type: 1,          // member
+            allow: allowBits,
+          })),
+        ];
+
+        const mentionList = userIds.map(uid => `<@${uid}>`).join(', ');
+
+        return res.send({
+          type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
+          data: {
+            content: `✅ Channel **#${channelName}** created under **Teams**!\n👥 Added: ${mentionList}`,
+          },
+        });
+
+      } catch (err) {
+        console.error('Error creating channel:', err);
+        return res.send({
+          type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
+          data: {
+            content: '❌ Failed to create channel. Check the bot has **Manage Channels** and **Manage Roles** permissions.',
+            flags: InteractionResponseFlags.EPHEMERAL,
+          },
+        });
+      }
+    }
+
     console.error(`unknown command: ${name}`);
     return res.status(400).json({ error: 'unknown command' });
   }
+
+  
 
   // ─── MESSAGE COMPONENTS ───────────────────────────────────────────────────
   if (type === InteractionType.MESSAGE_COMPONENT) {
